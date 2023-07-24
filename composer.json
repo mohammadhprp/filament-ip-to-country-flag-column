@@ -1,0 +1,51 @@
+{
+    "name": "mohammadhprp/filament-ip-to-country-flag-column",
+    "description": "Display Country flag from IP address in your Filament tables",
+    "keywords": [
+        "mohammadhrpr",
+        "laravel",
+        "filament-ip-to-country-flag",
+        "admin panel",
+        "tables",
+        "column"
+    ],
+    "homepage": "https://github.com/mohammadhprp/filament-ip-to-country-flag-column",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammadhprp",
+            "email": "mohammadhprp@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+	"filament/filament": "^2.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^7.0|^8.0",
+        "pestphp/pest": "^1.21",
+        "pestphp/pest-plugin-laravel": "^1.1",
+        "pestphp/pest-plugin-livewire": "^1.0",
+        "pestphp/pest-plugin-parallel": "^0.3",
+        "phpunit/phpunit": "^9.5|^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mohammadhprp\\IPToCountryFlagColumn\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mohammadhprp\\IPToCountryFlagColumn\\IPToCountryFlagColumnServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
