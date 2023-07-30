@@ -1,15 +1,40 @@
 @php
-    $ip = $getIpWithFlag();
-    $info = $getIpInfo();
+    $ipAddress = $getIP();
+    $countryFlag = $getFlag();
+    $location = $getLocation();
+
+    $locationPosition = $getLocationPosition();
+    $flagPosition = $getFlagPosition();
+
+    $hideIP = $getHideIP();
+    $hideFlag = $getHideFlag();
+    $hideLocation = $getHideLocation();
 @endphp
 
 <div>
+    @if($locationPosition == 'above' && !$hideLocation)
+        <div class="text-sm text-gray-500">
+            {{ $location }}
+        </div>
+    @endif
+
     <span>
-        {{ $ip }}
+        @if($flagPosition == 'left' && !$hideFlag)
+            {{ $countryFlag }}
+        @endif
+
+        @unless($hideIP)
+            {{ $ipAddress }}
+        @endunless
+
+        @if($flagPosition == 'right' && !$hideFlag)
+            {{ $countryFlag }}
+        @endif
     </span>
-    <div @class([
-            'text-sm text-gray-500'
-        ])>
-        {{ $info }}
-    </div>
+
+    @if($locationPosition == 'below' && !$hideLocation)
+        <div class="text-sm text-gray-500">
+            {{ $location }}
+        </div>
+    @endif
 </div>
