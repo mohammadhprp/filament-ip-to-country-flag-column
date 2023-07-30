@@ -16,17 +16,57 @@ Display country flag from IP address in your Filament tables
 ## Installation
 
 You can install the package via composer:
+
 ```bash
 composer require mohammadhprp/filament-ip-to-country-flag-column
 ```
 
 ## Usage
 
+To use the package, follow these steps:
+
 ```php
 use Mohammadhprp\IPToCountryFlagColumn\Columns\IPToCountryFlagColumn;
 
-IPToCountryFlagColumn::make('client_ip')
+IPToCountryFlagColumn::make('client_ip');
 ```
+
+### Options
+
+1. **Flag position**: Change the position of the flag using `flagPosition`. Available options: `right` and `left`.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')->flagPosition('left');
+   ```
+   > 💡 Note: Default flag position is `right`.
+
+2. **Hide flag**: Hide the flag using `hideFlag`.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')->hideFlag();
+   ```
+
+3. **Location position**: Change the location position using `location()`. Available options: `below` and `above`.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')->location(position: 'above');
+   ```
+   > 💡 Note: Default location position is `below`.
+
+4. **Location separator**: Change the location separator using `location()`.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')->location(separator: '-');
+   ```
+   > 💡 Note: Default location separator is `,`.
+
+5. **Hide city or country name**: Hide city or country name using `hideCity()` or `hideCountry()`.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')
+        ->hideCountry()
+        ->hideCity();
+   ```
 
 ## Changelog
 
