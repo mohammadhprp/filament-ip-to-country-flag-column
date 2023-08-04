@@ -2,10 +2,10 @@
 
 namespace Mohammadhprp\IPToCountryFlagColumn;
 
-use Filament\PluginServiceProvider;
 use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class IPToCountryFlagColumnServiceProvider extends PluginServiceProvider
+class IPToCountryFlagColumnServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'filament-ip-to-country-flag-column';
 

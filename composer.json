@@ -22,7 +22,7 @@
   "require": {
     "php": "^8.1",
     "ext-curl": "*",
-    "filament/filament": "^2.0|^3.0"
+    "filament/tables": "^3.0-stable"
   },
   "require-dev": {
     "laravel/pint": "^1.0",
