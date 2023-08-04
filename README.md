@@ -1,6 +1,6 @@
 # IP to country flag Column for Filament 🚩
 
-![License](https://img.shields.io/github/license/mohammadhprp/filament-ip-to-country-flag-column)
+[![License](https://img.shields.io/github/license/mohammadhprp/filament-ip-to-country-flag-column)](LICENSE)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
 [![Total Downloads](https://img.shields.io/packagist/dt/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
 
@@ -19,6 +19,12 @@ You can install the package via composer:
 
 ```bash
 composer require mohammadhprp/filament-ip-to-country-flag-column
+```
+
+For Filament v2:
+
+```bash
+composer require mohammadhprp/filament-ip-to-country-flag-column:"^0.2.0"
 ```
 
 ## Usage
