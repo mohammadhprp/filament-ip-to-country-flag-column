@@ -143,7 +143,7 @@ class IPToCountryFlagColumn extends TextColumn
             return "$this->countryName";
         }
 
-        return $this->city . $this->locationSeparator . $this->countryName;
+        return "$this->city$this->locationSeparator $this->countryName";
     }
 
     public function getLocationPosition(): string
