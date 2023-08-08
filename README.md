@@ -11,7 +11,7 @@ Display country flag from IP address in your Filament tables
 
 ## Screenshot
 
-![image](.github/assets/screenshot.png)
+![image](https://raw.githubusercontent.com/mohammadhprp/filament-ip-to-country-flag-column/master/.github/assets/screenshot.png)
 
 ## Installation
 
@@ -44,6 +44,7 @@ IPToCountryFlagColumn::make('client_ip');
    ```php
    IPToCountryFlagColumn::make('client_ip')->flagPosition('left');
    ```
+
    > 💡 Note: Default flag position is `right`.
 
 2. **Hide flag**: Hide the flag using `hideFlag`.
@@ -57,6 +58,7 @@ IPToCountryFlagColumn::make('client_ip');
    ```php
    IPToCountryFlagColumn::make('client_ip')->location(position: 'above');
    ```
+
    > 💡 Note: Default location position is `below`.
 
 4. **Location separator**: Change the location separator using `location()`.
@@ -64,6 +66,7 @@ IPToCountryFlagColumn::make('client_ip');
    ```php
    IPToCountryFlagColumn::make('client_ip')->location(separator: '-');
    ```
+
    > 💡 Note: Default location separator is `,`.
 
 5. **Hide city or country name**: Hide city or country name using `hideCity()` or `hideCountry()`.
