@@ -1,14 +1,10 @@
-ignore/
-
-.idea/
-.phpunit.result.cache
-build/
-composer.lock
-coverage
-docs/
-phpunit.xml
-phpstan.neon
-testbench.yaml
-vendor/
-node_modules
-.vscode/
+# File konfigurasi IDE
+# ---------------------
+/nbproject/
+.idea/*
+# File cache Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
