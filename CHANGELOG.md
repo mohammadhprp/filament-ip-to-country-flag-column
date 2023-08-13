@@ -1,5 +1,16 @@
 # Change Log
 
+
+## [1.0.2] - 2023-08-13
+
++ **Changes**:
+    + update License and Changelog paths in README.md
+
+## [1.0.1] - 2023-08-08
+
++ **Changes**:
+    + update screenshot path in README.md
+
 ## [1.0.0] - 2023-07-05
 
 + **Changes**:
