@@ -11,3 +11,4 @@ phpstan.neon
 testbench.yaml
 vendor/
 node_modules
+.vscode/
