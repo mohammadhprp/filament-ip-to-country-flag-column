@@ -79,7 +79,7 @@ IPToCountryFlagColumn::make('client_ip');
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+Please see [CHANGELOG](https://github.com/mohammadhprp/filament-ip-to-country-flag-column/blob/master/CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
 
@@ -95,4 +95,4 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## License
 
-This project is licensed under the MIT License - see the [License](LICENSE) file for details.
+This project is licensed under the MIT License - see the [License](https://github.com/mohammadhprp/filament-ip-to-country-flag-column/blob/master/LICENSE) file for details.
