@@ -26,8 +26,6 @@ composer require mohammadhprp/filament-ip-to-country-flag-column:"^0.2.0"
 
 **Please note:** it is required that you also setup [laravel-geoip](https://lyften.com/projects/laravel-geoip/doc/). With this package you can choose your preferred provider for getting the country code from the IP address.
 
-```bash  
-
 ## Usage
 
 To use the package, follow these steps:
