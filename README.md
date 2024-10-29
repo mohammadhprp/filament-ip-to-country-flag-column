@@ -4,10 +4,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
 [![Total Downloads](https://img.shields.io/packagist/dt/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
 
-Display country flag from IP address in your Filament tables
-
-> **Warning**
-> This plugin may cause a slight delay in page loading due to API calls to [iplocation](https://iplocation.com).
+Display country flag from IP address in your Filament tables using [laravel-geoip](https://github.com/Torann/laravel-geoip)
 
 ## Screenshot
 
@@ -26,6 +23,10 @@ For Filament v2:
 ```bash
 composer require mohammadhprp/filament-ip-to-country-flag-column:"^0.2.0"
 ```
+
+**Please note:** it is required that you also setup [laravel-geoip](https://lyften.com/projects/laravel-geoip/doc/). With this package you can choose your preferred provider for getting the country code from the IP address.
+
+```bash  
 
 ## Usage
 

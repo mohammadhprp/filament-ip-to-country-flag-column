@@ -22,7 +22,9 @@
   "require": {
     "php": "^8.1",
     "ext-curl": "*",
-    "filament/tables": "^3.0-stable"
+    "filament/tables": "^3.0-stable",
+    "torann/geoip": "^3.0",
+    "rinvex/countries": "^9.0"
   },
   "require-dev": {
     "laravel/pint": "^1.0",

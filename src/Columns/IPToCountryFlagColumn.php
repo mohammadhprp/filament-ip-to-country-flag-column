@@ -3,7 +3,6 @@
 namespace Mohammadhprp\IPToCountryFlagColumn\Columns;
 
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Collection;
 
 class IPToCountryFlagColumn extends TextColumn
 {
@@ -88,12 +87,13 @@ class IPToCountryFlagColumn extends TextColumn
     {
         $this->ip = $this->getStateFromRecord();
 
+        /// Reset state to default
+        $this->city = null;
+        $this->countryName = null;
+        $this->flag = null;
+
         /// Return default state if IP was null
         if ($this->ip === null) {
-            $this->city = null;
-            $this->countryName = null;
-            $this->flag = null;
-
             return $this->getDefaultState() ?? '-';
         }
 
@@ -107,18 +107,16 @@ class IPToCountryFlagColumn extends TextColumn
             return "$this->ip 🏠";
         }
 
-        $location = $this->ip2Location($this->ip);
-
-        $countryCode = $location->get('country_code');
+        $location = geoip($this->ip);
+        $countryCode = $location->iso_code;
 
         if ($countryCode === null) {
             return $this->ip;
         }
 
-        $this->city = $location->get('city');
-        $this->countryName = $location->get('country_name');
-
-        $this->flag = $this->getCountyFlag($countryCode);
+        $this->city = $location->city;
+        $this->countryName = $location->country;
+        $this->flag = $this->getCountryFlag($countryCode);
 
         return $this->ip;
     }
@@ -166,48 +164,8 @@ class IPToCountryFlagColumn extends TextColumn
         return $this->isLocationHide;
     }
 
-    private function getCountyFlag(string $countryCode): string
+    private function getCountryFlag(string $countryCode): string
     {
-        $jsonData = file_get_contents(__DIR__ . '/../../resources/jsons/countries-flag.json');
-        $countries_data = collect(json_decode($jsonData, true));
-
-        $country = $countries_data->where('code', '=', $countryCode)->first();
-        return $country['flag'];
-    }
-
-    private function ip2Location(string $ip): Collection
-    {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://iplocation.com/',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array('ip' => $ip),
-            CURLOPT_HTTPHEADER => array(
-                'User-Agent: Mozilla/5.0 (Linux; Android 12.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36',
-                'Accept: */*',
-                'Accept-Language: en-US,en;q=0.5',
-                'Accept-Encoding: gzip, deflate, br',
-                'Referer: https://iplocation.com/',
-                'Origin: https://iplocation.com',
-                'Connection: keep-alive',
-                'Sec-Fetch-Dest: empty',
-                'Sec-Fetch-Mode: cors',
-                'Sec-Fetch-Site: same-origin',
-                'TE: trailers'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-        return collect(json_decode($response, true));
+        return country($countryCode)->getEmoji();
     }
 }
