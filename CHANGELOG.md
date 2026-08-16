@@ -1,6 +1,18 @@
 # Change Log
 
 
+## [2.0.0] - 2026-08-16
+
++ **Changes**:
+    + Upgrade support to Filament v5
+    + Require PHP 8.2 or newer
+    + Add a custom location resolver for caching or alternative IP location providers
+    + Add feature tests and Composer test script
+    + Add continuous integration for PHP 8.3, 8.4, and 8.5
+    + Add an example Laravel 12 and Filament 5 application
+    + Add security policy and Dependabot configuration
+    + Fix stale location data when reusing the column for different records
+
 ## [1.0.2] - 2023-08-13
 
 + **Changes**:
