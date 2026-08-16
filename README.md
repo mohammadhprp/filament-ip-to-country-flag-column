@@ -90,6 +90,12 @@ IPToCountryFlagColumn::make('client_ip');
 composer test
 ```
 
+## Example Application
+
+The `example/` directory contains a Laravel 12 and Filament 5 application
+using this package through a local Composer path repository. See
+[`example/README.md`](example/README.md) for setup and login instructions.
+
 ## Changelog
 
 Please see [CHANGELOG](https://github.com/mohammadhprp/filament-ip-to-country-flag-column/blob/master/CHANGELOG.md) for more information on what has changed recently.

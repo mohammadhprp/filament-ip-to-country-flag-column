@@ -10,3 +10,4 @@
 *.sublime-project
 
 /vendor/
+/example/vendor/
