@@ -103,14 +103,13 @@ class IPToCountryFlagColumn extends TextColumn
 
     public function getIP(): string
     {
+        $this->city = null;
+        $this->countryName = null;
+        $this->flag = null;
         $this->ip = $this->getStateFromRecord();
 
         // / Return default state if IP was null
         if ($this->ip === null) {
-            $this->city = null;
-            $this->countryName = null;
-            $this->flag = null;
-
             return $this->getDefaultState() ?? '-';
         }
 
@@ -210,12 +209,13 @@ class IPToCountryFlagColumn extends TextColumn
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => ['ip' => $ip],
+            CURLOPT_POSTFIELDS => http_build_query(['ip' => $ip]),
             CURLOPT_HTTPHEADER => [
                 'User-Agent: Mozilla/5.0 (Linux; Android 12.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36',
                 'Accept: */*',
+                'Content-Type: application/x-www-form-urlencoded',
                 'Accept-Language: en-US,en;q=0.5',
-                'Accept-Encoding: gzip, deflate, br',
+                'Accept-Encoding: gzip, deflate',
                 'Referer: https://iplocation.com/',
                 'Origin: https://iplocation.com',
                 'Connection: keep-alive',

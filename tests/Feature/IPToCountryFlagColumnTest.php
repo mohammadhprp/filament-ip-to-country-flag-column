@@ -53,6 +53,24 @@ it('handles invalid and localhost addresses', function (string $ip, string $expe
     ['127.0.0.1', '127.0.0.1 🏠'],
 ]);
 
+it('does not reuse location data from a previous record', function () {
+    $column = IPToCountryFlagColumn::make('ip')
+        ->locationResolver(fn (): array => [
+            'country_code' => 'US',
+            'country_name' => 'United States',
+            'city' => 'Mountain View',
+        ]);
+
+    $column->record(['ip' => '8.8.8.8']);
+    $column->getIP();
+
+    $column->record(['ip' => '127.0.0.1']);
+
+    expect($column->getIP())->toBe('127.0.0.1 🏠')
+        ->and($column->getFlag())->toBeNull()
+        ->and($column->getLocation())->toBe('');
+});
+
 it('formats locations when city or country is hidden', function () {
     $base = fn (): IPToCountryFlagColumn => IPToCountryFlagColumn::make('ip')
         ->record(['ip' => '8.8.8.8'])
