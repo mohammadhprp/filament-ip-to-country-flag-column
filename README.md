@@ -84,6 +84,21 @@ IPToCountryFlagColumn::make('client_ip');
        ]);
    ```
 
+7. **Lazy loading**: Defer location lookups until the table has loaded. This avoids blocking the initial page response when the column is used with a deferred Filament table.
+
+   ```php
+   protected function table(Table $table): Table
+   {
+       return $table
+           ->deferLoading()
+           ->columns([
+               IPToCountryFlagColumn::make('client_ip')->lazy(),
+           ]);
+   }
+   ```
+
+   Location responses from the default provider are cached for 24 hours. Use `locationResolver()` when you need application-specific caching or a different provider.
+
 ## Testing
 
 ```bash

@@ -12,7 +12,8 @@ it('creates a filament text column', function () {
         ->and($column->getLocationPosition())->toBe('below')
         ->and($column->getHideIP())->toBeFalse()
         ->and($column->getHideFlag())->toBeFalse()
-        ->and($column->getHideLocation())->toBeFalse();
+        ->and($column->getHideLocation())->toBeFalse()
+        ->and($column->isLazy())->toBeFalse();
 });
 
 it('supports fluent display configuration', function () {
@@ -28,6 +29,13 @@ it('supports fluent display configuration', function () {
         ->and($column->getHideLocation())->toBeTrue()
         ->and($column->getFlagPosition())->toBe('left')
         ->and($column->getLocationPosition())->toBe('above');
+});
+
+it('supports lazy location lookups', function () {
+    $column = IPToCountryFlagColumn::make('ip')->lazy();
+
+    expect($column->isLazy())->toBeTrue()
+        ->and($column->lazy(false)->isLazy())->toBeFalse();
 });
 
 it('resolves an IP without making a network request', function () {
