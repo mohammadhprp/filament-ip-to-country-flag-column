@@ -6,6 +6,8 @@
 
 Display country flag from IP address in your Filament tables
 
+This version supports Filament 5 and requires PHP 8.2 or newer.
+
 > **Warning**
 > This plugin may cause a slight delay in page loading due to API calls to [iplocation](https://iplocation.com).
 
@@ -19,12 +21,6 @@ You can install the package via composer:
 
 ```bash
 composer require mohammadhprp/filament-ip-to-country-flag-column
-```
-
-For Filament v2:
-
-```bash
-composer require mohammadhprp/filament-ip-to-country-flag-column:"^0.2.0"
 ```
 
 ## Usage
@@ -76,6 +72,29 @@ IPToCountryFlagColumn::make('client_ip');
         ->hideCountry()
         ->hideCity();
    ```
+
+6. **Custom location resolver**: Use a custom resolver to cache lookups or use another IP location provider.
+
+   ```php
+   IPToCountryFlagColumn::make('client_ip')
+       ->locationResolver(fn (string $ip): array => [
+           'country_code' => 'US',
+           'country_name' => 'United States',
+           'city' => 'Mountain View',
+       ]);
+   ```
+
+## Testing
+
+```bash
+composer test
+```
+
+## Example Application
+
+The `example/` directory contains a Laravel 12 and Filament 5 application
+using this package through a local Composer path repository. See
+[`example/README.md`](example/README.md) for setup and login instructions.
 
 ## Changelog
 

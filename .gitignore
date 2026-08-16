@@ -8,3 +8,6 @@
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
+
+/vendor/
+/example/vendor/
