@@ -5,6 +5,7 @@ namespace Mohammadhprp\IPToCountryFlagColumn\Columns;
 use Closure;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class IPToCountryFlagColumn extends TextColumn
 {
@@ -27,6 +28,8 @@ class IPToCountryFlagColumn extends TextColumn
     protected bool $isCountryHide = false;
 
     protected bool $isCityHide = false;
+
+    protected bool $isLazy = false;
 
     protected string $flagPosition = 'right';
 
@@ -76,6 +79,16 @@ class IPToCountryFlagColumn extends TextColumn
         return $this;
     }
 
+    /**
+     * Defer external location lookups when the table uses deferred loading.
+     */
+    public function lazy(bool $condition = true): static
+    {
+        $this->isLazy = $condition;
+
+        return $this;
+    }
+
     public function location(string $position = 'below', string $separator = ','): static
     {
         $this->locationPosition = $position;
@@ -121,6 +134,10 @@ class IPToCountryFlagColumn extends TextColumn
         // / Check to IP address not be localhost
         if ($this->ip === '127.0.0.1') {
             return "$this->ip 🏠";
+        }
+
+        if ($this->isLazy && $this->shouldDeferLocationLookup()) {
+            return $this->ip;
         }
 
         $location = $this->ip2Location($this->ip);
@@ -182,6 +199,11 @@ class IPToCountryFlagColumn extends TextColumn
         return $this->isLocationHide;
     }
 
+    public function isLazy(): bool
+    {
+        return $this->isLazy;
+    }
+
     private function getCountyFlag(string $countryCode): string
     {
         $jsonData = file_get_contents(__DIR__.'/../../resources/jsons/countries-flag.json');
@@ -198,6 +220,26 @@ class IPToCountryFlagColumn extends TextColumn
             return collect(($this->locationResolver)($ip));
         }
 
+        return Cache::remember(
+            "filament-ip-to-country-flag-column.location.{$ip}",
+            now()->addDay(),
+            fn (): Collection => $this->requestLocation($ip),
+        );
+    }
+
+    protected function shouldDeferLocationLookup(): bool
+    {
+        try {
+            $table = $this->getTable();
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return $table->isLoadingDeferred() && ! $table->isLoaded();
+    }
+
+    protected function requestLocation(string $ip): Collection
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, [

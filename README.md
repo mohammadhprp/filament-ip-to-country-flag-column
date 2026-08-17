@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/github/license/mohammadhprp/filament-ip-to-country-flag-column)](LICENSE)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
 [![Total Downloads](https://img.shields.io/packagist/dt/mohammadhprp/filament-ip-to-country-flag-column.svg?style=flat-square)](https://packagist.org/packages/mohammadhprp/filament-ip-to-country-flag-column)
-
+[![Plumb score](https://plumbphp.dev/badges/mohammadhprp/filament-ip-to-country-flag-column/composite.svg)](https://plumbphp.dev/mohammadhprp/filament-ip-to-country-flag-column)
 Display country flag from IP address in your Filament tables
 
 This version supports Filament 5 and requires PHP 8.2 or newer.
@@ -83,6 +83,21 @@ IPToCountryFlagColumn::make('client_ip');
            'city' => 'Mountain View',
        ]);
    ```
+
+7. **Lazy loading**: Defer location lookups until the table has loaded. This avoids blocking the initial page response when the column is used with a deferred Filament table.
+
+   ```php
+   protected function table(Table $table): Table
+   {
+       return $table
+           ->deferLoading()
+           ->columns([
+               IPToCountryFlagColumn::make('client_ip')->lazy(),
+           ]);
+   }
+   ```
+
+   Location responses from the default provider are cached for 24 hours. Use `locationResolver()` when you need application-specific caching or a different provider.
 
 ## Testing
 

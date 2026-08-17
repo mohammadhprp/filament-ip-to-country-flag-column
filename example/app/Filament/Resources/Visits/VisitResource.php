@@ -38,9 +38,11 @@ class VisitResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->deferLoading()
             ->columns([
                 IPToCountryFlagColumn::make('ip_address')
-                    ->label('Visitor IP'),
+                    ->label('Visitor IP')
+                    ->lazy(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
