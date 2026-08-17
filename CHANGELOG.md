@@ -1,6 +1,13 @@
 # Change Log
 
 
+## [2.1.0] - 2026-08-17
+
++ **Changes**:
+    + Add lazy loading for IP location lookups
+    + Cache default location provider responses for 24 hours
+    + Update documentation and tests for lazy loading
+
 ## [2.0.0] - 2026-08-16
 
 + **Changes**:
