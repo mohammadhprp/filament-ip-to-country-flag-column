@@ -1,40 +1,37 @@
 @php
-    $ipAddress = $getIP();
-    $countryFlag = $getFlag();
-    $location = $getLocation();
-
     $locationPosition = $getLocationPosition();
     $flagPosition = $getFlagPosition();
 
     $hideIP = $getHideIP();
     $hideFlag = $getHideFlag();
     $hideLocation = $getHideLocation();
+
+    // 直接获取原始数据，避免在视图中调用方法
+    $ipList = $getIpList();
+ 
+    // 处理显示内容
+    $displayContent = '';
+    if (!empty($ipList) && count($ipList) > 0) {
+        foreach ($ipList as $ipData) {
+            $flag = $ipData['flag'] ?? '';
+            $ip = $ipData['ip'] ?? '-';
+            $displayContent .= '<div class="flex items-center my-1">';
+
+            if ($flagPosition == 'left' && !$hideFlag) {
+                $displayContent .= $flag . '&nbsp;&nbsp;';
+            }
+
+            if (!$hideIP) {
+                $displayContent .= '<span class="font-mono">' . $ip . '</span>';
+            }
+
+            if ($flagPosition == 'right' && !$hideFlag) {
+                $displayContent .= '&nbsp;&nbsp;' . $flag;
+            }
+
+            $displayContent .= '</div>';
+        }
+    }
 @endphp
 
-<div>
-    @if($locationPosition == 'above' && !$hideLocation)
-        <div class="text-sm text-gray-500">
-            {{ $location }}
-        </div>
-    @endif
-
-    <span>
-        @if($flagPosition == 'left' && !$hideFlag)
-            {{ $countryFlag }}
-        @endif
-
-        @unless($hideIP)
-            {{ $ipAddress }}
-        @endunless
-
-        @if($flagPosition == 'right' && !$hideFlag)
-            {{ $countryFlag }}
-        @endif
-    </span>
-
-    @if($locationPosition == 'below' && !$hideLocation)
-        <div class="text-sm text-gray-500">
-            {{ $location }}
-        </div>
-    @endif
-</div>
+<div>{!! $displayContent !!}</div>
