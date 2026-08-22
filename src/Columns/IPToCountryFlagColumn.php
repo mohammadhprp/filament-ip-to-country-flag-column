@@ -6,18 +6,25 @@ use Closure;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
 
 class IPToCountryFlagColumn extends TextColumn
 {
     protected string $view = 'filament-ip-to-country-flag-column::columns.ip-to-country-flag-column';
 
-    protected ?string $ip = null;
+    protected array|string|null $ip = null;
 
     protected ?string $flag = null;
 
     protected ?string $countryName = null;
 
     protected ?string $city = null;
+
+    protected array $ipList = [];
+
+    protected array $flagsList = [];
+
+    protected array $locationsList = [];
 
     protected bool $isIPHide = false;
 
@@ -42,6 +49,14 @@ class IPToCountryFlagColumn extends TextColumn
     protected function setUp(): void
     {
         parent::setUp();
+
+        // 防止HTML被转义
+        $this->formatStateUsing(function ($state) {
+            if (is_string($state) && str_contains($state, '<img')) {
+                return new HtmlString($state);
+            }
+            return $state;
+        });
     }
 
     public function hideIP(): static
@@ -114,50 +129,173 @@ class IPToCountryFlagColumn extends TextColumn
         return $this;
     }
 
-    public function getIP(): string
+    public function getIP(): array|string
     {
         $this->city = null;
         $this->countryName = null;
         $this->flag = null;
-        $this->ip = $this->getStateFromRecord();
+        $this->ipList = [];
+        $this->flagsList = [];
+        $this->locationsList = [];
 
-        // / Return default state if IP was null
-        if ($this->ip === null) {
-            return $this->getDefaultState() ?? '-';
+        $state = $this->getStateFromRecord();
+
+        // Handle array input (multiple IPs)
+        if (is_array($state)) {
+            $this->ip = $state;
+            foreach ($state as $singleIP) {
+                $this->processSingleIP($singleIP);
+            }
+
+            // For compatibility, return formatted string for multiple IPs with HTML flags
+            $result = [];
+            foreach ($this->ipList as $ipData) {
+                $result[] = $ipData['flag'] . ' ' . $ipData['ip'];
+            }
+            return implode('<br>', $result);
         }
 
-        // / Check to IP address be valid
-        if (! filter_var($this->ip, FILTER_VALIDATE_IP)) {
-            return 'Invalid IP address';
-        }
-
-        // / Check to IP address not be localhost
-        if ($this->ip === '127.0.0.1') {
-            return "$this->ip 🏠";
-        }
-
-        if ($this->isLazy && $this->shouldDeferLocationLookup()) {
-            return $this->ip;
-        }
-
-        $location = $this->ip2Location($this->ip);
-
-        $countryCode = $location->get('country_code');
-
-        if ($countryCode === null) {
-            return $this->ip;
-        }
-
-        $this->city = $location->get('city');
-        $this->countryName = $location->get('country_name');
-
-        $this->flag = $this->getCountyFlag($countryCode);
-
+        // Handle single IP - use processSingleIP for all cases
+        $this->ip = $state ?? $this->getDefaultState() ?? '-';
+        $this->processSingleIP($this->ip);
         return $this->ip;
     }
 
-    public function getFlag(): ?string
+    protected function processSingleIP(mixed $ip): void
     {
+        $city = null;
+        $countryName = null;
+        $flag = null;
+
+        // Handle empty, null, or default placeholder
+        if ($ip === null || $ip === '' || $ip === '-') {
+            $this->ipList[] = [
+                'ip' => '-',
+                'flag' => null,
+                'location' => null,
+                'city' => null,
+                'country' => null
+            ];
+            // For backward compatibility
+            $this->city = null;
+            $this->countryName = null;
+            $this->flag = null;
+            return;
+        }
+
+        // Handle array case (shouldn't happen here, but just in case)
+        if (is_array($ip)) {
+            foreach ($ip as $singleIP) {
+                $this->processSingleIP($singleIP);
+            }
+            return;
+        }
+
+        // Convert to string for safety
+        $ip = (string)$ip;
+
+        // Check to IP address be valid
+        if (! filter_var($ip, FILTER_VALIDATE_IP)) {
+            $this->ipList[] = [
+                'ip' => $ip,
+                'flag' => null,
+                'location' => null,
+                'city' => null,
+                'country' => null
+            ];
+            // For backward compatibility
+            $this->city = null;
+            $this->countryName = null;
+            $this->flag = null;
+            return;
+        }
+
+        // Check to IP address not be localhost
+        if ($ip === '127.0.0.1') {
+            $this->ipList[] = [
+                'ip' => $ip,
+                'flag' => '🏠',
+                'location' => 'localhost',
+                'city' => null,
+                'country' => null
+            ];
+            // For backward compatibility
+            $this->city = null;
+            $this->countryName = null;
+            $this->flag = '🏠';
+            return;
+        }
+
+        // Check for lazy loading
+        if ($this->isLazy && $this->shouldDeferLocationLookup()) {
+            $this->ipList[] = [
+                'ip' => $ip,
+                'flag' => null,
+                'location' => null,
+                'city' => null,
+                'country' => null
+            ];
+            return;
+        }
+
+        $location = $this->ip2Location($ip);
+        $countryCode = $location->get('country_code');
+
+        if ($countryCode === null) {
+            $this->ipList[] = [
+                'ip' => $ip,
+                'flag' => null,
+                'location' => null,
+                'city' => null,
+                'country' => null
+            ];
+            // For backward compatibility
+            $this->city = null;
+            $this->countryName = null;
+            $this->flag = null;
+            return;
+        }
+
+        $city = $location->get('city');
+        $countryName = $location->get('country_name');
+        $flagHtml = $this->getCountyFlag($countryCode);
+
+        $this->ipList[] = [
+            'ip' => $ip,
+            'flag' => $flagHtml,
+            'location' => $this->formatLocation($city, $countryName),
+            'city' => $city,
+            'country' => $countryName
+        ];
+
+        // For backward compatibility, set single values
+        $this->city = $city;
+        $this->countryName = $countryName;
+        $this->flag = $flagHtml;
+    }
+
+    protected function formatLocation(?string $city, ?string $countryName): string
+    {
+        if ($this->isCountryHide || $countryName === null) {
+            return $city ?? '';
+        }
+
+        if ($this->isCityHide || $city === null) {
+            return $countryName;
+        }
+
+        return "$city$this->locationSeparator $countryName";
+    }
+
+    public function getFlag(): string|HtmlString
+    {
+        // Ensure getIP() is called to populate data
+        if (empty($this->ipList)) {
+            $this->getIP();
+        }
+
+        // For multiple IPs, return first flag for backward compatibility
+        // 使用HtmlString包装HTML，防止被转义
         return $this->flag;
     }
 
@@ -168,6 +306,11 @@ class IPToCountryFlagColumn extends TextColumn
 
     public function getLocation(): string
     {
+        // Ensure getIP() is called to populate data
+        if (empty($this->ipList)) {
+            $this->getIP();
+        }
+
         if ($this->isCountryHide || $this->countryName === null) {
             return "$this->city";
         }
@@ -177,6 +320,38 @@ class IPToCountryFlagColumn extends TextColumn
         }
 
         return "$this->city$this->locationSeparator $this->countryName";
+    }
+
+    public function getIpList(): array
+    {
+        // 确保每次都重新处理当前记录，不使用缓存
+        $this->ipList = []; // 清空之前的数据
+        $this->getIP();     // 重新处理当前记录
+
+        // 如果处理后仍然为空，添加默认条目
+        if (empty($this->ipList)) {
+            $state = $this->getStateFromRecord();
+            $this->ipList[] = [
+                'ip' => is_array($state) ? 'Array: ' . count($state) . ' IPs' : ($state ?? '-'),
+                'flag' => null,
+                'location' => null,
+                'city' => null,
+                'country' => null
+            ];
+        }
+
+        return $this->ipList;
+    }
+
+    public function isMultipleIPs(): bool
+    {
+        $list = $this->getIpList();
+        return count($list) > 1;
+    }
+
+    public function hasMultipleIPs(): bool
+    {
+        return count($this->ipList) > 1;
     }
 
     public function getLocationPosition(): string
@@ -206,12 +381,33 @@ class IPToCountryFlagColumn extends TextColumn
 
     private function getCountyFlag(string $countryCode): string
     {
-        $jsonData = file_get_contents(__DIR__.'/../../resources/jsons/countries-flag.json');
-        $countries_data = collect(json_decode($jsonData, true));
+        try {
+            $jsonPath = __DIR__.'/../../resources/jsons/countries-flag.json';
 
-        $country = $countries_data->where('code', '=', $countryCode)->first();
+            if (!file_exists($jsonPath)) {
+                return '';
+            }
 
-        return $country['flag'] ?? '';
+            $jsonData = file_get_contents($jsonPath);
+
+            if ($jsonData === false) {
+                return '';
+            }
+
+            $countries_data = collect(json_decode($jsonData, true));
+
+            $country = $countries_data->where('code', '=', $countryCode)->first();
+
+            // 使用图片URL替代emoji字符，返回HtmlString防止被转义
+            if ($country && isset($country['code'])) {
+                $html = '<img src="https://flagcdn.com/w20/' . strtolower($country['code']) . '.png" alt="' . $country['name'] . '" class="inline-flag" style="width: 20px; height: auto; vertical-align: middle; border-radius: 2px;" />';
+                return $html;
+            }
+
+            return '';
+        } catch (\Exception $e) {
+            return '';
+        }
     }
 
     protected function ip2Location(string $ip): Collection
