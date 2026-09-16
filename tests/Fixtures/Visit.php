@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace Tests\Fixtures;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Visit extends Model
 {
-    use HasFactory;
-
     protected $fillable = ['ip_address'];
 }

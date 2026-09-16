@@ -1,6 +1,15 @@
 # Change Log
 
 
+## [Unreleased]
+
++ **Changes**:
+    + Resolve IP locations asynchronously so the table render is never blocked by the location API
+    + Resolve each cell in its own request so values appear one by one as they load
+    + Add `loadingState()`, `errorState()`, `errorStateUsing()`, `whenVisible()`, and `retryable()` options
+    + Remove location response caching; use `locationResolver()` for caching, a proxy, or a self-hosted service
+    + Register the column's JavaScript and CSS through Filament's asset pipeline
+
 ## [2.1.0] - 2026-08-17
 
 + **Changes**:

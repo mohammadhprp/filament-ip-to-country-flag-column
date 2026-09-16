@@ -26,5 +26,6 @@ class DatabaseSeeder extends Seeder
         Visit::create(['ip_address' => '8.8.8.8']);
         Visit::create(['ip_address' => '1.1.1.1']);
         Visit::create(['ip_address' => '127.0.0.1']);
+        Visit::factory(30)->create();
     }
 }

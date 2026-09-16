@@ -1,0 +1,28 @@
+.fi-ip-country-flag-skeleton {
+    display: inline-block;
+    min-width: 4rem;
+    height: 0.875rem;
+    border-radius: 0.25rem;
+    background: linear-gradient(90deg, rgb(0 0 0 / 6%) 25%, rgb(0 0 0 / 12%) 37%, rgb(0 0 0 / 6%) 63%);
+    background-size: 400% 100%;
+    animation: fi-ip-country-flag-shimmer 1.4s ease infinite;
+}
+
+.dark .fi-ip-country-flag-skeleton {
+    background: linear-gradient(90deg, rgb(255 255 255 / 8%) 25%, rgb(255 255 255 / 16%) 37%, rgb(255 255 255 / 8%) 63%);
+    background-size: 400% 100%;
+}
+
+@keyframes fi-ip-country-flag-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fi-ip-country-flag-skeleton { animation: none; }
+}
+
+[data-ip-country-flag-error="1"] .fi-ip-country-flag-retry {
+    text-decoration: underline;
+    cursor: pointer;
+}

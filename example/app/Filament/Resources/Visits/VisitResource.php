@@ -41,8 +41,7 @@ class VisitResource extends Resource
             ->deferLoading()
             ->columns([
                 IPToCountryFlagColumn::make('ip_address')
-                    ->label('Visitor IP')
-                    ->lazy(),
+                    ->label('Visitor IP'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
