@@ -1,7 +1,7 @@
 # Change Log
 
 
-## [Unreleased]
+## [2.2.0] - 2026-09-16
 
 + **Changes**:
     + Resolve IP locations asynchronously so the table render is never blocked by the location API
