@@ -4,8 +4,12 @@ namespace Mohammadhprp\IPToCountryFlagColumn\Columns;
 
 use Closure;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
+use Mohammadhprp\IPToCountryFlagColumn\Resolution\CellToken;
+use Throwable;
 
 class IPToCountryFlagColumn extends TextColumn
 {
@@ -29,7 +33,13 @@ class IPToCountryFlagColumn extends TextColumn
 
     protected bool $isCityHide = false;
 
-    protected bool $isLazy = false;
+    protected string|Htmlable|Closure|null $loadingState = null;
+
+    protected string|Htmlable|Closure|null $errorState = null;
+
+    protected bool|Closure $loadsWhenVisible = false;
+
+    protected bool|Closure $isRetryable = true;
 
     protected string $flagPosition = 'right';
 
@@ -42,6 +52,79 @@ class IPToCountryFlagColumn extends TextColumn
     protected function setUp(): void
     {
         parent::setUp();
+    }
+
+    /**
+     * What the cell shows before it resolves. Defaults to a CSS skeleton.
+     */
+    public function loadingState(string|Htmlable|Closure|null $state): static
+    {
+        $this->loadingState = $state;
+
+        return $this;
+    }
+
+    public function getLoadingState(): string|Htmlable|null
+    {
+        return $this->evaluate($this->loadingState)
+            ?? new HtmlString('<span class="fi-ip-country-flag-skeleton" aria-hidden="true"></span>');
+    }
+
+    /**
+     * What the cell shows when the resolver throws. Defaults to a translated
+     * "Could not load".
+     */
+    public function errorState(string|Htmlable|Closure|null $state): static
+    {
+        $this->errorState = $state;
+
+        return $this;
+    }
+
+    public function errorStateUsing(?Closure $callback): static
+    {
+        return $this->errorState($callback);
+    }
+
+    /**
+     * The exception is only ever exposed to an explicit developer callback. Never
+     * render $exception->getMessage() straight into the cell - a failing resolver
+     * can leak API credentials or SQL.
+     */
+    public function getErrorState(?Throwable $exception = null): string|Htmlable|null
+    {
+        return $this->evaluate($this->errorState, ['exception' => $exception])
+            ?? __('ip-to-country-flag-column::ip-to-country-flag-column.error');
+    }
+
+    /**
+     * Defer a cell's lookup until it scrolls into the viewport.
+     */
+    public function whenVisible(bool|Closure $condition = true): static
+    {
+        $this->loadsWhenVisible = $condition;
+
+        return $this;
+    }
+
+    public function loadsWhenVisible(): bool
+    {
+        return (bool) $this->evaluate($this->loadsWhenVisible);
+    }
+
+    /**
+     * Whether a failed cell can be clicked to retry.
+     */
+    public function retryable(bool|Closure $condition = true): static
+    {
+        $this->isRetryable = $condition;
+
+        return $this;
+    }
+
+    public function isRetryable(): bool
+    {
+        return (bool) $this->evaluate($this->isRetryable);
     }
 
     public function hideIP(): static
@@ -75,16 +158,6 @@ class IPToCountryFlagColumn extends TextColumn
     public function hideCity(): static
     {
         $this->isCityHide = true;
-
-        return $this;
-    }
-
-    /**
-     * Defer external location lookups when the table uses deferred loading.
-     */
-    public function lazy(bool $condition = true): static
-    {
-        $this->isLazy = $condition;
 
         return $this;
     }
@@ -134,10 +207,6 @@ class IPToCountryFlagColumn extends TextColumn
         // / Check to IP address not be localhost
         if ($this->ip === '127.0.0.1') {
             return "$this->ip 🏠";
-        }
-
-        if ($this->isLazy && $this->shouldDeferLocationLookup()) {
-            return $this->ip;
         }
 
         $location = $this->ip2Location($this->ip);
@@ -199,9 +268,59 @@ class IPToCountryFlagColumn extends TextColumn
         return $this->isLocationHide;
     }
 
-    public function isLazy(): bool
+    /**
+     * Identifies this cell for the batched resolution round-trip.
+     */
+    public function getCellToken(): ?CellToken
     {
-        return $this->isLazy;
+        $recordKey = $this->getRecordKey();
+
+        if (blank($recordKey)) {
+            return null;
+        }
+
+        return new CellToken($this->getName(), $recordKey);
+    }
+
+    /**
+     * Render the fully resolved cell - IP, flag and location - for one record.
+     *
+     * Called by the BatchResolver after the page has painted, never during the
+     * synchronous table render. The record is set on this (cloned) column instance
+     * so the column's own view can resolve everything it needs through the same
+     * getters it has always used.
+     *
+     * @param  Model|array<string, mixed>  $record
+     */
+    public function renderResolvedHtml(Model|array $record): string
+    {
+        $this->record($record);
+
+        // Deliberately not toHtml(): that is overridden to always emit the
+        // placeholder. render() renders the column's own view synchronously,
+        // which is exactly what a resolved cell needs.
+        return $this->render()->render();
+    }
+
+    /**
+     * The location lookup never runs during the synchronous table render. Every
+     * cell renders the placeholder instead, and the value is resolved afterwards in
+     * one batched Livewire request.
+     */
+    public function toHtml(): string
+    {
+        $token = $this->getCellToken();
+
+        if (! $token instanceof CellToken) {
+            return '';
+        }
+
+        return view('filament-ip-to-country-flag-column::columns.placeholder', [
+            'token' => $token->encode(),
+            'loadingState' => $this->getLoadingState(),
+            'whenVisible' => $this->loadsWhenVisible(),
+            'retryable' => $this->isRetryable(),
+        ])->render();
     }
 
     private function getCountyFlag(string $countryCode): string
@@ -220,22 +339,7 @@ class IPToCountryFlagColumn extends TextColumn
             return collect(($this->locationResolver)($ip));
         }
 
-        return Cache::remember(
-            "filament-ip-to-country-flag-column.location.{$ip}",
-            now()->addDay(),
-            fn (): Collection => $this->requestLocation($ip),
-        );
-    }
-
-    protected function shouldDeferLocationLookup(): bool
-    {
-        try {
-            $table = $this->getTable();
-        } catch (\Throwable) {
-            return false;
-        }
-
-        return $table->isLoadingDeferred() && ! $table->isLoaded();
+        return $this->requestLocation($ip);
     }
 
     protected function requestLocation(string $ip): Collection
